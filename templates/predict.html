@@ -1,0 +1,23 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Predict
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='signin.css')}}">
+<link rel="stylesheet" href="{{url_for('.static', filename='predict.css')}}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+      <form class="form-predict" method="POST" action="/predict?project_id={{ project.id }}">
+        <h2 align="center" class="form-signin-heading">Predict</h2>
+        {{ form.hidden_tag() }}
+        {{ wtf.form_field(form.text) }}
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Predict</button>
+      </form>
+    </div> <!-- /container -->
+{% endblock %}

@@ -158,11 +158,11 @@ def createProject():
         nb, nb_score = m.naiveBayes(X_train, y_train, X_test, y_test)
         rf, rf_score = m.randomForest(X_train, y_train, X_test, y_test)
         xg, xg_score = m.xgBoost(X_train, y_train, X_test, y_test)
-        if nb > rf and nb > xg:
+        if nb_score > rf_score and nb_score > xg_score:
             model = nb
-        elif rf > xg and rf > nb:
+        elif rf_score > xg_score and rf_score > nb_score:
             model = rf
-        elif xg > nb and xg > rf:
+        elif xg_score > nb_score and xg_score > rf_score:
             model = xg
         pickled_vectorizer = pickle.dumps(vectorizer)
         pickled_model = pickle.dumps(model)
@@ -172,6 +172,10 @@ def createProject():
                               user_id=current_user.id)
         db.session.add(new_project)
         db.session.commit()
+        if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'])):
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        else:
+            print("The file does not exist")
         return '<h1> New Project created </h1>'
 
     return render_template('createproject.html', form=form)
@@ -212,9 +216,6 @@ def predict():
 def showProjects():
     projects = Project.query.filter_by(user_id=current_user.id).all()
     return render_template('projects.html', projects=projects)
-
-
-
 
 
 if __name__ == '__main__':

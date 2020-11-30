@@ -5,6 +5,7 @@ import re
 import nltk
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -46,6 +47,7 @@ class Project(UserMixin, db.Model):
     name = db.Column(db.String(50))
     vectorizer = db.Column(db.PickleType())
     model = db.Column(db.PickleType())
+    encoder = db.Column(db.PickleType())
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 
@@ -98,7 +100,8 @@ def signup():
 
     if form.validate_on_submit():
         # return '<h1>' + form.username.data + ' ' + form.password.data + '</h1>'
-        hashed_pwd = generate_password_hash(form.password.data, method='sha256')
+        hashed_pwd = generate_password_hash(
+            form.password.data, method='sha256')
         new_user = User(username=form.username.data,
                         email=form.email.data,
                         password=hashed_pwd)
@@ -133,7 +136,7 @@ class ProjectForm(FlaskForm):
 
 
 class PredictForm(FlaskForm):
-    text = TextAreaField('Prediction Text', validators=[InputRequired(), Length(max=50)],
+    text = TextAreaField('Prediction Text', validators=[InputRequired(), Length(min=10)],
                          render_kw={"placeholder": "Enter text for prediction",
                                     "rows": 10
                                     })
@@ -149,9 +152,13 @@ def createProject():
         f = form.data['upload']
         filename = secure_filename(f.filename)
         f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        df_csv = pd.read_csv(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        df_csv = pd.read_csv(os.path.join(
+            app.config['UPLOAD_FOLDER'], filename))
         print('Dataframe read into pandas')
-        df_csv['cleaned_data'] = df_csv.apply(lambda ldata: getStemmedReview(ldata['data']), axis=1)
+        df_csv['cleaned_data'] = df_csv.apply(
+            lambda ldata: getStemmedReview(ldata['data']), axis=1)
+        encoder = LabelEncoder()
+        df_csv['class'] = encoder.fit_transform(df_csv['class'])
         print(df_csv.head())
         m = ModelBuilding(df_csv)
         X_train, X_test, y_train, y_test, vectorizer = m.tfidf(df_csv)
@@ -164,11 +171,16 @@ def createProject():
             model = rf
         elif xg_score > nb_score and xg_score > rf_score:
             model = xg
+        pickled_encoder = pickle.dumps(encoder)
         pickled_vectorizer = pickle.dumps(vectorizer)
         pickled_model = pickle.dumps(model)
+        print('NB:', nb_score)
+        print('RF:', rf_score)
+        print('XG:', xg_score)
         new_project = Project(name=form.name.data,
                               vectorizer=pickled_vectorizer,
                               model=pickled_model,
+                              encoder=pickled_encoder,
                               user_id=current_user.id)
         db.session.add(new_project)
         db.session.commit()
@@ -176,7 +188,7 @@ def createProject():
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         else:
             print("The file does not exist")
-        return '<h1> New Project created </h1>'
+        return redirect(url_for('dashboard'))
 
     return render_template('createproject.html', form=form)
 
@@ -185,7 +197,8 @@ def getStemmedReview(ldata):
     review = re.sub(pattern='[^a-zA-Z]', repl=' ', string=ldata)
     review = review.lower()
     review_words = review.split()
-    review_words = [word for word in review_words if not word in set(stopwords.words('english'))]
+    review_words = [word for word in review_words if not word in set(
+        stopwords.words('english'))]
     ps = PorterStemmer()
     review = [ps.stem(word) for word in review_words]
     review = ' '.join(review)
@@ -198,16 +211,21 @@ def predict():
     form = PredictForm()
     user_id = current_user.id
     project_id = int(request.args.get('project_id'))
-    project = Project.query.filter_by(user_id=user_id).filter_by(id=project_id).first()
+    project = Project.query.filter_by(
+        user_id=user_id).filter_by(id=project_id).first()
     if form.validate_on_submit():
         vectorizer = pickle.loads(project.vectorizer)
         model = pickle.loads(project.model)
+        encoder = pickle.loads(project.encoder)
         text = form.text.data
         vectorized_input = vectorizer.transform([text])
         pred_class = model.predict(vectorized_input)[0]
+        prediction = encoder.inverse_transform([pred_class])[0]
         proba = np.max(model.predict_proba(vectorized_input))
         print(proba)
-        return render_template('prediction.html', pred_class=pred_class, proba=proba)
+        # import pdb
+        # pdb.set_trace()
+        return render_template('predict.html', form=form, project=project, pred_class=prediction, proba=proba)
     return render_template('predict.html', form=form, project=project)
 
 

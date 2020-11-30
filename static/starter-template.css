@@ -1,7 +1,23 @@
 body {
-  padding-top: 50px;
+    padding-top: 50px;
 }
+
 .starter-template {
-  padding: 40px 15px;
-  text-align: center;
+    padding: 40px 15px;
+    text-align: center;
+}
+
+.modal-btn {
+    background: #333333;
+    color: white;
+    padding: 15px;
+}
+
+.modal-btn:focus,
+.modal-btn:hover {
+    color: white;
+}
+
+.modal-div {
+    text-align: center;
 }

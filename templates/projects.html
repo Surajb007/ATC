@@ -1,77 +1,61 @@
-{% extends "bootstrap/base.html" %}
-
-{% block title %}
-Projects
-{% endblock %}
-
-{% block styles %}
-{{super()}}
+{% extends "bootstrap/base.html" %} {% block title %} Projects {% endblock %} {% block styles %} {{super()}}
 <link rel="stylesheet" href="{{url_for('.static', filename='dashboard.css')}}">
-<link rel="stylesheet" href="{{url_for('.static', filename='projects.css')}}">
-{% endblock %}
-
-{% block content %}
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container-fluid">
+<link rel="stylesheet" href="{{url_for('.static', filename='projects.css')}}"> {% endblock %} {% block content %}
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/">Auto Topic Classification</a>
+            <a class="navbar-brand" href="/">Auto Topic Classification</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="#">Dashboard</a></li>
-            <li><a href="#">Settings</a></li>
-            <li><a href="#">Profile</a></li>
-            <li><a href="{{ url_for('logout') }}">Log Out</a></li>
-          </ul>
-          <form class="navbar-form navbar-right">
-            <input type="text" class="form-control" placeholder="Search...">
-          </form>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#">Dashboard</a></li>
+                <li><a href="#">Settings</a></li>
+                <li><a href="#">Profile</a></li>
+                <li><a href="{{ url_for('logout') }}">Log Out</a></li>
+            </ul>
+            <form class="navbar-form navbar-right">
+                <input type="text" class="form-control" placeholder="Search...">
+            </form>
         </div>
-      </div>
-    </nav>
+    </div>
+</nav>
 
-    <div class="container-fluid">
-      <div class="row">
+<div class="container-fluid">
+    <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
-          <ul class="nav nav-sidebar">
-            <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
-            <li><a href="{{ url_for('createProject') }}">New Project</a></li>
-            <li><a href="{{ url_for('showProjects') }}">My Projects</a></li>
-            <li><a href="#">Export</a></li>
-          </ul>
-          <ul class="nav nav-sidebar">
-            <li><a href="">Nav item</a></li>
-            <li><a href="">Nav item again</a></li>
-            <li><a href="">One more nav</a></li>
-            <li><a href="">Another nav item</a></li>
-            <li><a href="">More navigation</a></li>
-          </ul>
-          <ul class="nav nav-sidebar">
-            <li><a href="">Nav item again</a></li>
-            <li><a href="">One more nav</a></li>
-            <li><a href="">Another nav item</a></li>
-          </ul>
+            <ul class="nav nav-sidebar">
+                <li><a href="{{ url_for('dashboard') }}">Dashboard </a></li>
+                <li><a href="{{ url_for('createProject') }}">New Project</a></li>
+                <li class="active"><a href="{{ url_for('showProjects') }}">My Projects <span class="sr-only">(current)</span></a></li>
+            </ul>
+            <ul class="nav nav-sidebar">
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('index') }}">Index</a></li>
+            </ul>
+            <ul class="nav nav-sidebar">
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-          <h1 class="page-header">Projects</h1>
-           <div class="row placeholders">
-              {%for project in projects%}
+            <h1 class="page-header">Projects</h1>
+            <div class="row placeholders">
+                {%for project in projects%}
                 <div class="col-xs-6 col-sm-3 placeholder">
-                  <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-                  <h4>Project: {{ project.name }}</h4>
-                  <a class="btn btn-dark" href="/predict?project_id={{ project.id }}" role="button">Predict</a>
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
+                    <h4>Project: {{ project.name }}</h4>
+                    <a class="btn btn-dark" href="/predict?project_id={{ project.id }}" role="button">Predict</a>
                 </div>
-              {%endfor%}
-           </div>
+                {%endfor%}
+            </div>
 
-          <h2 class="sub-header">Section title</h2>
-          <div class="table-responsive">
+            <!-- <h2 class="sub-header">Section title</h2> -->
+            <!-- <div class="table-responsive">
             <table class="table table-striped">
               <thead>
                 <tr>
@@ -197,8 +181,8 @@ Projects
                 </tr>
               </tbody>
             </table>
-          </div>
+          </div> -->
         </div>
-      </div>
     </div>
+</div>
 {% endblock %}
